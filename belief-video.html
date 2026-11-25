@@ -17,16 +17,6 @@
   .stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--red);
          font-family:'Wix Madefor Display',sans-serif;color:var(--ink)}
 
-  /* шапка: слева логотип + петух, справа название блока (без дат) */
-  .head{position:absolute;left:44px;top:30px;height:150px;display:flex;align-items:center;gap:26px}
-  .head img{display:block}
-  .head .lockup{height:138px}
-  .head .rooster{height:150px;transform-origin:62% 92%}
-  .titlebox{position:absolute;right:48px;top:30px;height:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:12px}
-  .tstack{display:grid}
-  .titlebox h1{grid-area:1/1;justify-self:end;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:var(--cream);
-               font-size:84px;line-height:.92;white-space:nowrap;letter-spacing:.01em;text-align:right}
-  .titlebox .remeslo{height:40px;display:block}
 
   .panel{position:absolute;left:28px;top:206px;width:1024px;height:796px;background:var(--cream);border-radius:32px;overflow:hidden}
   .orn{position:absolute;left:0;right:0;bottom:0;height:62px;background:url(assets/ornament_straight.png) repeat-x 0 0/auto 62px}
@@ -68,11 +58,6 @@
 </head>
 <body>
 <div class="stage" id="stage">
-  <div class="head">
-    <img class="lockup" src="assets/lockup.png" alt="">
-    <img class="rooster" id="rooster" src="assets/rooster.png" alt="">
-  </div>
-  <div class="titlebox" id="titlebox"><div class="tstack"><h1 id="title">Верите ли вы?</h1></div><img class="remeslo" src="assets/remeslo.png" alt=""></div>
   <div class="panel" id="panel">
     <div class="sect"><div class="track" id="track"></div><div class="pill" id="pill"></div></div>
     <div class="layer" id="LS"></div>
@@ -81,9 +66,11 @@
   </div>
   <div class="orn" id="orn"></div>
 </div>
+<script src="header.js"></script>
 <script src="belief-data.js"></script>
 <script>
-const T = { inS:.15, think:[2.0, 11.5], reveal:11.5, swap:13.6, end:22.6 };
+MPH.mount([{id:'title',text:'Верите ли вы?'}]);
+const T = { inS:.15, think:[2.8, 11.5], reveal:11.5, swap:13.6, end:22.6 };
 const P = new URLSearchParams(location.search);
 const n = +(P.get('n') || 1);
 const B = BELIEF.find(x => x.n === n) || BELIEF[0];
@@ -119,15 +106,15 @@ $('LV').innerHTML = `<div class="ss" id="ss">${esc(B.s)}</div>
 
 function fit(layer, el, min){ if(!el) return; let fs=parseFloat(getComputedStyle(el).fontSize);
   while (layer.scrollHeight > layer.clientHeight+1 && fs>min){ fs-=2; el.style.fontSize=fs+'px'; } }
-function fitTitle(){
-  const r = document.querySelector('.head .rooster').getBoundingClientRect().right + 50;
-  document.querySelectorAll('.titlebox h1').forEach(h=>{ let fs=84; h.style.fontSize='';
-    while (h.getBoundingClientRect().left < r && fs>48){ fs-=2; h.style.fontSize=fs+'px'; } }); }
+const fitTitle = () => MPH.fit();
 
-const E = { out:'cubic-bezier(.2,.8,.2,1)', back:'cubic-bezier(.34,1.56,.64,1)', io:'cubic-bezier(.65,0,.35,1)' };
+// плавность: easeOutQuint для выездов, лёгкий отскок вместо «пружины»; появления медленнее в SLOW раз
+const E = { out:'cubic-bezier(.22,1,.36,1)', back:'cubic-bezier(.28,1.18,.52,1)', io:'cubic-bezier(.65,0,.35,1)' };
+const SLOW = 1.6;
 function A(el, frames, at, dur, ease=E.out, extra={}){
   if (typeof el==='string') el=$(el); if(!el) return;
-  return el.animate(frames, {delay:at*1000, duration:dur*1000, easing:ease, fill:'both', ...extra});
+  const k = (extra.iterations || ease==='linear' || extra.fixed) ? 1 : SLOW; delete extra.fixed;
+  return el.animate(frames, {delay:at*1000, duration:dur*k*1000, easing:ease, fill:'both', ...extra});
 }
 function build(){
   const t0=T.inS, rv=T.reveal, sw=T.swap;
@@ -138,8 +125,8 @@ function build(){
   A('track', [{transform:'scaleX(0)'},{transform:'scaleX(1)'}], t0+.1, .8);
   A('pill', [{opacity:0,transform:'translateX(-40px)'},{opacity:1,transform:'none'}], t0, .55, E.back);
   A('st', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], t0+.35, .7);
-  A('cT', [{opacity:0,transform:'translateY(50px)'},{opacity:1,transform:'none'}], t0+1.0, .6, E.back);
-  A('cF', [{opacity:0,transform:'translateY(50px)'},{opacity:1,transform:'none'}], t0+1.18, .6, E.back);
+  A('cT', [{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}], t0+1.0, .6, E.back);
+  A('cF', [{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}], t0+1.4, .6, E.back);
   A('or', [{opacity:0,transform:'translateX(-50%) scale(0)'},{opacity:1,transform:'translateX(-50%) scale(1)'}], t0+1.5, .4, E.back);
   // пока думают — чипы «дышат» по очереди
   const ph = 2.4;
@@ -148,16 +135,16 @@ function build(){
 
   A('timer', [{opacity:0},{opacity:1}], T.think[0]-.3, .3);
   A('timerBar', [{transform:'scaleX(1)'},{transform:'scaleX(0)'}], T.think[0], T.think[1]-T.think[0], 'linear');
-  A('timer', [{opacity:1},{opacity:0}], rv, .3);
+  A('timer', [{opacity:1},{opacity:0}], rv, .3, E.out, {fill:'forwards'});
 
   // раскрытие
   const win = B.truth ? $('cT') : $('cF'), lose = B.truth ? $('cF') : $('cT');
-  A(lose, [{opacity:1,filter:'saturate(1)'},{opacity:.3,filter:'saturate(.3)'}], rv, .5, E.io);
-  A('or', [{opacity:1},{opacity:0}], rv, .3);
+  A(lose, [{opacity:1,filter:'saturate(1)'},{opacity:.3,filter:'saturate(.3)'}], rv, .5, E.io, {fill:'forwards'});
+  A('or', [{opacity:1},{opacity:0}], rv, .3, E.out, {fill:'forwards'});
   A(win.querySelector('.hl'), [{opacity:0},{opacity:1}], rv+.25, .45, E.io);
   A(win.querySelector('b'), [{color:'#5B1C12'},{color:'#F9F0E4'}], rv+.25, .45, E.io);
-  A(win, [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}], rv+.25, .7, E.io);
-  if (!B.truth) A(win.querySelector('svg'), [{transform:'rotate(0)'},{transform:'rotate(-15deg)'},{transform:'rotate(12deg)'},{transform:'rotate(-6deg)'},{transform:'rotate(0)'}], rv+.4, .9, 'ease-in-out');
+  A(win, [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}], rv+.25, .7, E.io, {fill:'forwards'});
+  if (!B.truth) A(win.querySelector('svg'), [{transform:'rotate(0)'},{transform:'rotate(-15deg)'},{transform:'rotate(12deg)'},{transform:'rotate(-6deg)'},{transform:'rotate(0)'}], rv+.4, .9, 'ease-in-out', {fill:'forwards'});
 
   // переход к вердикту
   A('LS', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .45, E.io);

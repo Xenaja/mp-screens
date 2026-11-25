@@ -18,16 +18,6 @@
   .stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--red);
          font-family:'Wix Madefor Display',sans-serif;color:var(--ink)}
 
-  /* шапка: слева логотип + петух, справа название блока (без дат) */
-  .head{position:absolute;left:44px;top:30px;height:150px;display:flex;align-items:center;gap:26px}
-  .head img{display:block}
-  .head .lockup{height:138px}
-  .head .rooster{height:150px;transform-origin:62% 92%}
-  .titlebox{position:absolute;right:48px;top:30px;height:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:12px}
-  .tstack{display:grid}
-  .titlebox h1{grid-area:1/1;justify-self:end;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:var(--cream);
-               font-size:84px;line-height:.92;white-space:nowrap;letter-spacing:.01em;text-align:right}
-  .titlebox .remeslo{height:40px;display:block}
 
   .panel{position:absolute;left:28px;top:206px;width:1024px;height:796px;background:var(--cream);border-radius:32px;overflow:hidden}
   .orn{position:absolute;left:0;right:0;bottom:0;height:62px;background:url(assets/ornament_straight.png) repeat-x 0 0/auto 62px}
@@ -68,14 +58,6 @@
 </head>
 <body>
 <div class="stage" id="stage">
-  <div class="head">
-    <img class="lockup" src="assets/lockup.png" alt="">
-    <img class="rooster" id="rooster" src="assets/rooster.png" alt="">
-  </div>
-  <div class="titlebox">
-      <div class="tstack"><h1 id="tQ">Вопрос</h1><h1 id="tA">Ответ</h1></div>
-      <img class="remeslo" src="assets/remeslo.png" alt="">
-    </div>
   <div class="panel" id="panel">
     <div class="sect"><div class="track" id="track"></div><div class="pill" id="pill"></div></div>
     <div class="layer" id="LQ"></div>
@@ -84,12 +66,14 @@
   </div>
   <div class="orn" id="orn"></div>
 </div>
+<script src="header.js"></script>
 <script src="quiz-data.js"></script>
 <script>
+MPH.mount([{id:'tQ',text:'Вопрос'},{id:'tA',text:'Ответ'}]);
 // ---------- тайминг, сек ----------
 const T = {
   inQ: 0.15,      // появление вопроса
-  think: [2.3, 13.0], // таймер «думаем»
+  think: [3.0, 13.0], // таймер «думаем»
   reveal: 13.0,   // подсветка правильного варианта
   swap: 15.4,     // переход к слайду-ответу
   end: 23.0,      // длина ролика
@@ -112,19 +96,19 @@ $('LA').innerHTML = `<div class="qs" id="qs">${esc(Q.q)}</div>
   <div class="comment" id="cm">${esc(Q.comment)}</div>
   <div class="foot" id="foot">${Q.logo?`<img src="assets/logos/${Q.logo}.png" alt="">`:''}</div>`;
 
-function fitTitle(){
-  const r = document.querySelector('.head .rooster').getBoundingClientRect().right + 50;
-  document.querySelectorAll('.titlebox h1').forEach(h=>{ let fs=84; h.style.fontSize='';
-    while (h.getBoundingClientRect().left < r && fs>48){ fs-=2; h.style.fontSize=fs+'px'; } }); }
+const fitTitle = () => MPH.fit();
 // ---------- автоподгон (как в quiz.html) ----------
 function fit(layer, el, min){ if(!el) return; let fs=parseFloat(getComputedStyle(el).fontSize);
   while (layer.scrollHeight > layer.clientHeight+1 && fs>min){ fs-=2; el.style.fontSize=fs+'px'; } }
 
 // ---------- анимации ----------
-const E = { out:'cubic-bezier(.2,.8,.2,1)', back:'cubic-bezier(.34,1.56,.64,1)', io:'cubic-bezier(.65,0,.35,1)' };
+// плавность: easeOutQuint для выездов, лёгкий отскок вместо «пружины»; появления медленнее в SLOW раз
+const E = { out:'cubic-bezier(.22,1,.36,1)', back:'cubic-bezier(.28,1.18,.52,1)', io:'cubic-bezier(.65,0,.35,1)' };
+const SLOW = 1.6;
 function A(el, frames, at, dur, ease=E.out, extra={}){
   if (typeof el==='string') el=$(el); if(!el) return;
-  return el.animate(frames, {delay:at*1000, duration:dur*1000, easing:ease, fill:'both', ...extra});
+  const k = (extra.iterations || ease==='linear' || extra.fixed) ? 1 : SLOW; delete extra.fixed;
+  return el.animate(frames, {delay:at*1000, duration:dur*k*1000, easing:ease, fill:'both', ...extra});
 }
 function build(){
   const tq=T.inQ, sw=T.swap, rv=T.reveal;
@@ -135,8 +119,8 @@ function build(){
     0.8, 4.0, 'ease-in-out', {iterations:Infinity, fill:'none'});
 
   // шапка: смена «Вопрос» → «Ответ»
-  A('tQ', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .32, 'cubic-bezier(.5,0,.75,0)');
-  A('tA', [{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}], sw+.34, .5, E.out);
+  A('tQ', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .4, 'cubic-bezier(.5,0,.75,0)', {fixed:1});
+  A('tA', [{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}], sw+.42, .8, E.out, {fixed:1});
 
   // плашка раздела
   A('track', [{transform:'scaleX(0)'},{transform:'scaleX(1)'}], tq+.1, .8, E.out);
@@ -145,25 +129,25 @@ function build(){
   // вопрос и варианты
   A('q', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], tq+.35, .7);
   [0,1,2].forEach(i=>{
-    const o=$('o'+i), at=tq+1.0+i*.22;
-    A(o, [{opacity:0,transform:'translateX(70px)'},{opacity:1,transform:'none'}], at, .6);
+    const o=$('o'+i), at=tq+1.15+i*.3;
+    A(o, [{opacity:0,transform:'translateX(40px)'},{opacity:1,transform:'none'}], at, .6);
     A(o.querySelector('.let'), [{transform:'scale(0)'},{transform:'scale(1)'}], at+.15, .5, E.back);
     if (i===Q.ok){
       A(o.querySelector('.hl'), [{opacity:0},{opacity:1}], rv+.25, .45, E.io);
       A(o.querySelector('span'), [{color:'#5B1C12'},{color:'#F9F0E4'}], rv+.25, .45, E.io);
       A(o.querySelector('.let'), [{color:'#BE1717'},{color:'#8C1414'}], rv+.25, .45, E.io);
       A(o.querySelector('.bar'), [{background:'#BE1717'},{background:'#E2B863'}], rv+.25, .45, E.io);
-      A(o, [{transform:'scale(1)'},{transform:'scale(1.035)'},{transform:'scale(1)'}], rv+.25, .7, E.io);
+      A(o, [{transform:'scale(1)'},{transform:'scale(1.035)'},{transform:'scale(1)'}], rv+.25, .7, E.io, {fill:'forwards'});
       A(o.querySelector('.ok'), [{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'scale(1)'}], rv+.6, .45, E.back);
       A(o.querySelector('.tick'), [{strokeDashoffset:1},{strokeDashoffset:0}], rv+.8, .4, E.out);
     } else {
-      A(o, [{opacity:1,filter:'saturate(1)'},{opacity:.32,filter:'saturate(.3)'}], rv, .5, E.io);
+      A(o, [{opacity:1,filter:'saturate(1)'},{opacity:.32,filter:'saturate(.3)'}], rv, .5, E.io, {fill:'forwards'});
     }
   });
   // таймер
   A('timer', [{opacity:0},{opacity:1}], T.think[0]-.3, .3);
   A('timerBar', [{transform:'scaleX(1)'},{transform:'scaleX(0)'}], T.think[0], T.think[1]-T.think[0], 'linear');
-  A('timer', [{opacity:1},{opacity:0}], rv, .3);
+  A('timer', [{opacity:1},{opacity:0}], rv, .3, E.out, {fill:'forwards'});
 
   // переход к ответу
   A('LQ', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .45, E.io);

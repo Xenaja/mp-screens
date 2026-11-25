@@ -2,3 +2,5 @@ src/
 out/
 *.py
 __pycache__/
+preview/
+stills/
