@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Экраны МП · Верите ли вы? (видео)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Wix+Madefor+Display:wght@500;600;700;800&display=block" rel="stylesheet">
+<style>
+  /* Ролик «Верите ли вы?»: утверждение → вердикт, 1080×1080.
+     ?n=1..14. В браузере играет сам (&loop — по кругу); для рендера: &rec, затем window.seek(сек). */
+  :root{
+    --red:#BE1717; --bordo:#8C1414; --gold:#E2B863; --copper:#C67720; --cream:#F9F0E4; --peach:#F6DFBD; --peach2:#FBEAD2;
+    --ink:#5B1C12; --brown:#723715;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#222}
+  .stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--red);
+         font-family:'Wix Madefor Display',sans-serif;color:var(--ink)}
+
+  /* шапка: слева логотип + петух, справа название блока (без дат) */
+  .head{position:absolute;left:44px;top:30px;height:150px;display:flex;align-items:center;gap:26px}
+  .head img{display:block}
+  .head .lockup{height:138px}
+  .head .rooster{height:150px;transform-origin:62% 92%}
+  .titlebox{position:absolute;right:48px;top:30px;height:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:12px}
+  .tstack{display:grid}
+  .titlebox h1{grid-area:1/1;justify-self:end;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:var(--cream);
+               font-size:84px;line-height:.92;white-space:nowrap;letter-spacing:.01em;text-align:right}
+  .titlebox .remeslo{height:40px;display:block}
+
+  .panel{position:absolute;left:28px;top:206px;width:1024px;height:796px;background:var(--cream);border-radius:32px;overflow:hidden}
+  .orn{position:absolute;left:0;right:0;bottom:0;height:62px;background:url(assets/ornament_straight.png) repeat-x 0 0/auto 62px}
+
+  .sect{position:absolute;left:44px;right:0;top:40px;display:flex;align-items:center;height:58px}
+  .sect .track{position:absolute;left:40px;right:0;top:9px;bottom:9px;background:var(--peach);border-radius:999px 0 0 999px;transform-origin:left center}
+  .pill{position:relative;z-index:1;background:var(--red);color:var(--cream);font-family:'Oswald',sans-serif;
+        font-weight:600;font-size:34px;line-height:58px;height:58px;padding:0 30px;border-radius:999px;
+        text-transform:uppercase;letter-spacing:.03em}
+  .pill .no{color:var(--gold)}
+
+  .layer{position:absolute;left:44px;right:44px;top:98px;bottom:46px;display:flex;flex-direction:column}
+
+  /* утверждение */
+  .st{margin-top:34px;font-weight:800;font-size:60px;line-height:1.14;color:var(--ink);flex:none;text-wrap:balance}
+  .vote{flex:1 0 auto;display:flex;align-items:flex-end;gap:24px;margin-top:36px}
+  .chip{position:relative;flex:1;height:150px;border-radius:30px;background:var(--peach2);display:flex;align-items:center;justify-content:center;gap:22px}
+  .chip .hl{position:absolute;inset:0;border-radius:30px;background:var(--bordo);opacity:0}
+  .chip b{position:relative;font-family:'Oswald',sans-serif;font-weight:600;font-size:60px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+  .chip svg{position:relative;flex:none}
+  .or{position:absolute;left:50%;bottom:51px;transform:translateX(-50%);z-index:2;width:48px;height:48px;border-radius:50%;
+      background:var(--red);color:var(--cream);font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;line-height:48px;text-align:center;text-transform:uppercase}
+
+  .timer{position:absolute;left:44px;right:44px;bottom:20px;height:8px;border-radius:4px;background:rgba(198,119,32,.18);overflow:hidden}
+  .timer i{position:absolute;inset:0;background:var(--gold);border-radius:4px;transform-origin:left center}
+
+  /* вердикт */
+  .ss{margin-top:28px;font-weight:600;font-size:30px;line-height:1.25;color:var(--brown);opacity:.78;flex:none;text-wrap:balance}
+  .verdict{position:relative;margin-top:34px;height:200px;border-radius:32px;flex:none;display:flex;align-items:center;padding:0 40px 0 48px}
+  .verdict b{font-family:'Oswald',sans-serif;font-weight:700;font-size:136px;line-height:1;text-transform:uppercase;letter-spacing:.015em;flex:1}
+  .verdict.true{background:var(--bordo);box-shadow:0 10px 0 -2px rgba(140,20,20,.18)}
+  .verdict.true b{color:var(--cream)}
+  .verdict.false{background:var(--gold);box-shadow:0 10px 0 -2px rgba(198,119,32,.25)}
+  .verdict.false b{color:var(--bordo)}
+  .verdict .ic{flex:none}
+  .verdict.false .ic{position:absolute;right:26px;top:-40px;transform-origin:50% 90%}
+  .comment{margin-top:36px;font-weight:500;font-size:40px;line-height:1.3;color:var(--ink);text-wrap:pretty}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="head">
+    <img class="lockup" src="assets/lockup.png" alt="">
+    <img class="rooster" id="rooster" src="assets/rooster.png" alt="">
+  </div>
+  <div class="titlebox" id="titlebox"><div class="tstack"><h1 id="title">Верите ли вы?</h1></div><img class="remeslo" src="assets/remeslo.png" alt=""></div>
+  <div class="panel" id="panel">
+    <div class="sect"><div class="track" id="track"></div><div class="pill" id="pill"></div></div>
+    <div class="layer" id="LS"></div>
+    <div class="layer" id="LV"></div>
+    <div class="timer" id="timer"><i id="timerBar"></i></div>
+  </div>
+  <div class="orn" id="orn"></div>
+</div>
+<script src="belief-data.js"></script>
+<script>
+const T = { inS:.15, think:[2.0, 11.5], reveal:11.5, swap:13.6, end:22.6 };
+const P = new URLSearchParams(location.search);
+const n = +(P.get('n') || 1);
+const B = BELIEF.find(x => x.n === n) || BELIEF[0];
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/(\p{L})-(\p{L})/gu,'$1‑$2')                                  // неразрывный дефис: «из‑за»
+  .replace(/(^|[\s«(])([а-яёА-ЯЁ]{1,2}|II|I|XVI|XIII|XIX|XVII)\s/gu,'$1$2 '); // предлоги и короткие слова не висят;
+const $ = id => document.getElementById(id);
+
+// иконки
+const medal = (s, id='', drawn=false) => `<svg ${id?`id="${id}"`:''} class="ic" width="${s}" height="${s}" viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#E2B863"/><circle cx="36" cy="36" r="27" fill="none" stroke="#C67720" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M21 37l10 10 21-23" fill="none" stroke="#8C1414" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" ${drawn?'':'class="tick"'}/></svg>`;
+// пряничный человечек подмигивает
+const ginger = (s, id='') => `<svg ${id?`id="${id}"`:''} class="ic" width="${s}" height="${s}" viewBox="0 0 100 100">
+  <g stroke="#B5651D" stroke-linecap="round" fill="none">
+    <path d="M22 50 L78 50" stroke-width="17"/><path d="M43 62 L31 89" stroke-width="17"/><path d="M57 62 L69 89" stroke-width="17"/>
+  </g>
+  <ellipse cx="50" cy="60" rx="19" ry="21" fill="#B5651D"/><circle cx="50" cy="27" r="20" fill="#B5651D"/>
+  <g stroke="#FFF7EA" stroke-width="2.6" stroke-linecap="round" fill="none">
+    <path d="M19 45 q3 5 0 10"/><path d="M81 45 q-3 5 0 10"/><path d="M27 84 q5 3 9 6"/><path d="M73 84 q-5 3 -9 6"/>
+    <path d="M42.5 22.5 q-.2 -1 0 0" stroke-width="5.5"/><path d="M53.5 23.5 q3 -3.5 6 0"/>
+    <path d="M42 33 q8 7 16 0"/>
+  </g>
+  <circle cx="50" cy="55" r="2.8" fill="#BE1717"/><circle cx="50" cy="65" r="2.8" fill="#BE1717"/>
+  <path d="M36 50 l5 -3 0 6z M64 50 l-5 -3 0 6z" fill="#BE1717"/><circle cx="50" cy="50" r="2.2" fill="#BE1717"/>
+</svg>`;
+
+$('pill').innerHTML = `Утверждение <span class="no">№ ${B.n}</span>`;
+$('LS').innerHTML = `<div class="st" id="st">${esc(B.s)}</div>
+  <div class="vote"><div class="chip" id="cT"><div class="hl"></div>${medal(70,'',true)}<b>Правда</b></div><div class="chip" id="cF"><div class="hl"></div>${ginger(84)}<b>Выдумка</b></div></div>
+  <div class="or" id="or">или</div>`;
+$('LV').innerHTML = `<div class="ss" id="ss">${esc(B.s)}</div>
+  <div class="verdict ${B.truth?'true':'false'}" id="vd"><b id="vw">${B.truth?'Правда':'Выдумка'}</b>${B.truth?medal(132,'vic'):ginger(240,'vic')}</div>
+  <div class="comment" id="cm">${esc(B.comment)}</div>`;
+
+function fit(layer, el, min){ if(!el) return; let fs=parseFloat(getComputedStyle(el).fontSize);
+  while (layer.scrollHeight > layer.clientHeight+1 && fs>min){ fs-=2; el.style.fontSize=fs+'px'; } }
+function fitTitle(){
+  const r = document.querySelector('.head .rooster').getBoundingClientRect().right + 50;
+  document.querySelectorAll('.titlebox h1').forEach(h=>{ let fs=84; h.style.fontSize='';
+    while (h.getBoundingClientRect().left < r && fs>48){ fs-=2; h.style.fontSize=fs+'px'; } }); }
+
+const E = { out:'cubic-bezier(.2,.8,.2,1)', back:'cubic-bezier(.34,1.56,.64,1)', io:'cubic-bezier(.65,0,.35,1)' };
+function A(el, frames, at, dur, ease=E.out, extra={}){
+  if (typeof el==='string') el=$(el); if(!el) return;
+  return el.animate(frames, {delay:at*1000, duration:dur*1000, easing:ease, fill:'both', ...extra});
+}
+function build(){
+  const t0=T.inS, rv=T.reveal, sw=T.swap;
+  const tile = 62*5757/369;
+  A('orn', [{backgroundPosition:'0 0'},{backgroundPosition:`-${tile}px 0`}], 0, 24, 'linear', {iterations:Infinity, fill:'none'});
+  A('rooster', [{transform:'rotate(0)'},{transform:'rotate(-4deg)'},{transform:'rotate(1.5deg)'},{transform:'rotate(0)'},{transform:'rotate(0)'}], .8, 4, 'ease-in-out', {iterations:Infinity, fill:'none'});
+
+  A('track', [{transform:'scaleX(0)'},{transform:'scaleX(1)'}], t0+.1, .8);
+  A('pill', [{opacity:0,transform:'translateX(-40px)'},{opacity:1,transform:'none'}], t0, .55, E.back);
+  A('st', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], t0+.35, .7);
+  A('cT', [{opacity:0,transform:'translateY(50px)'},{opacity:1,transform:'none'}], t0+1.0, .6, E.back);
+  A('cF', [{opacity:0,transform:'translateY(50px)'},{opacity:1,transform:'none'}], t0+1.18, .6, E.back);
+  A('or', [{opacity:0,transform:'translateX(-50%) scale(0)'},{opacity:1,transform:'translateX(-50%) scale(1)'}], t0+1.5, .4, E.back);
+  // пока думают — чипы «дышат» по очереди
+  const ph = 2.4;
+  A(document.querySelector('#cT svg'), [{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}], 3.0, 1.2, 'ease-in-out', {iterations:3, fill:'none', endDelay:ph*1000-1200});
+  A(document.querySelector('#cF svg'), [{transform:'rotate(0)'},{transform:'rotate(-12deg)'},{transform:'rotate(10deg)'},{transform:'rotate(0)'}], 4.2, 1.2, 'ease-in-out', {iterations:3, fill:'none', endDelay:ph*1000-1200});
+
+  A('timer', [{opacity:0},{opacity:1}], T.think[0]-.3, .3);
+  A('timerBar', [{transform:'scaleX(1)'},{transform:'scaleX(0)'}], T.think[0], T.think[1]-T.think[0], 'linear');
+  A('timer', [{opacity:1},{opacity:0}], rv, .3);
+
+  // раскрытие
+  const win = B.truth ? $('cT') : $('cF'), lose = B.truth ? $('cF') : $('cT');
+  A(lose, [{opacity:1,filter:'saturate(1)'},{opacity:.3,filter:'saturate(.3)'}], rv, .5, E.io);
+  A('or', [{opacity:1},{opacity:0}], rv, .3);
+  A(win.querySelector('.hl'), [{opacity:0},{opacity:1}], rv+.25, .45, E.io);
+  A(win.querySelector('b'), [{color:'#5B1C12'},{color:'#F9F0E4'}], rv+.25, .45, E.io);
+  A(win, [{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}], rv+.25, .7, E.io);
+  if (!B.truth) A(win.querySelector('svg'), [{transform:'rotate(0)'},{transform:'rotate(-15deg)'},{transform:'rotate(12deg)'},{transform:'rotate(-6deg)'},{transform:'rotate(0)'}], rv+.4, .9, 'ease-in-out');
+
+  // переход к вердикту
+  A('LS', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .45, E.io);
+  A('ss', [{opacity:0,transform:'translateY(16px)'},{opacity:.78,transform:'none'}], sw+.35, .5);
+  A('vd', [{opacity:0,transform:'scale(.9)'},{opacity:1,transform:'scale(1)'}], sw+.5, .6, E.back);
+  A('vw', [{opacity:0,letterSpacing:'.2em'},{opacity:1,letterSpacing:'.015em'}], sw+.6, .7, E.out);
+  if (B.truth){
+    A('vic', [{opacity:0,transform:'scale(.3) rotate(-60deg)'},{opacity:1,transform:'none'}], sw+.9, .55, E.back);
+    A(document.querySelector('#vic .tick'), [{strokeDashoffset:1},{strokeDashoffset:0}], sw+1.25, .45);
+  } else {
+    // человечек выпрыгивает из-за плашки и подмигивает-раскачивается
+    A('vic', [{opacity:0,transform:'translateY(80px) rotate(10deg) scale(.6)'},{opacity:1,transform:'translateY(-14px) rotate(-6deg) scale(1.04)',offset:.7},{opacity:1,transform:'none'}], sw+.85, .7, E.out);
+    A('vic', [{transform:'rotate(0)'},{transform:'rotate(-7deg)'},{transform:'rotate(6deg)'},{transform:'rotate(0)'}], sw+1.8, 1.6, 'ease-in-out', {iterations:Infinity, fill:'none', composite:'add'});
+  }
+  A('cm', [{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'none'}], sw+1.3, .7);
+}
+
+window.seek = t => { document.getAnimations().forEach(a=>{ a.pause(); a.currentTime = t*1000; }); };
+window.DUR = T.end;
+
+Promise.all(['800 60px "Wix Madefor Display"','500 40px "Wix Madefor Display"','600 30px "Wix Madefor Display"',
+  '700 74px Oswald','600 60px Oswald','700 136px Oswald'].map(f=>document.fonts.load(f,'АБВ'))).then(()=>document.fonts.ready).then(()=>{
+  fitTitle();
+  fit($('LS'), $('st'), 48);
+  fit($('LV'), $('cm'), 34);
+  build();
+  if (P.has('rec')) seek(0);
+  else if (P.has('loop')) setInterval(()=>{ document.getAnimations().forEach(x=>{x.currentTime=0; x.play();}); }, T.end*1000);
+  document.body.dataset.ready='1';
+});
+</script>
+</body>
+</html>

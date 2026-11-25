@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Экраны МП · Викторина (видео)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Wix+Madefor+Display:wght@500;600;700;800&display=block" rel="stylesheet">
+<style>
+  /* Анимированный ролик «вопрос → ответ», 1080×1080.
+     ?n=3 — номер вопроса. В браузере играет сам; для рендера: ?n=3&rec, затем window.seek(сек).
+     Тайминг — константа T ниже. */
+  :root{
+    --red:#BE1717; --bordo:#8C1414; --gold:#E2B863; --cream:#F9F0E4; --peach:#F6DFBD; --peach2:#FBEAD2;
+    --ink:#5B1C12; --brown:#723715;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#222}
+  .stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--red);
+         font-family:'Wix Madefor Display',sans-serif;color:var(--ink)}
+
+  /* шапка: слева логотип + петух, справа название блока (без дат) */
+  .head{position:absolute;left:44px;top:30px;height:150px;display:flex;align-items:center;gap:26px}
+  .head img{display:block}
+  .head .lockup{height:138px}
+  .head .rooster{height:150px;transform-origin:62% 92%}
+  .titlebox{position:absolute;right:48px;top:30px;height:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:12px}
+  .tstack{display:grid}
+  .titlebox h1{grid-area:1/1;justify-self:end;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:var(--cream);
+               font-size:84px;line-height:.92;white-space:nowrap;letter-spacing:.01em;text-align:right}
+  .titlebox .remeslo{height:40px;display:block}
+
+  .panel{position:absolute;left:28px;top:206px;width:1024px;height:796px;background:var(--cream);border-radius:32px;overflow:hidden}
+  .orn{position:absolute;left:0;right:0;bottom:0;height:62px;background:url(assets/ornament_straight.png) repeat-x 0 0/auto 62px}
+
+  .sect{position:absolute;left:44px;right:0;top:40px;display:flex;align-items:center;height:58px}
+  .sect .track{position:absolute;left:40px;right:0;top:9px;bottom:9px;background:var(--peach);border-radius:999px 0 0 999px;transform-origin:left center}
+  .pill{position:relative;z-index:1;background:var(--red);color:var(--cream);font-family:'Oswald',sans-serif;
+        font-weight:600;font-size:34px;line-height:58px;height:58px;padding:0 30px;border-radius:999px;
+        text-transform:uppercase;letter-spacing:.03em}
+  .pill .no{color:var(--gold)}
+
+  .layer{position:absolute;left:44px;right:44px;top:98px;bottom:46px;display:flex;flex-direction:column}
+
+  .q{margin-top:30px;font-weight:800;font-size:58px;line-height:1.13;color:var(--ink);flex:none;text-wrap:balance}
+  .opts{flex:1 0 auto;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;margin-top:34px}
+  .opt{position:relative;display:flex;align-items:center;gap:26px;background:var(--peach2);border-radius:26px;padding:14px 30px 14px 16px;min-height:112px}
+  .opt .hl{position:absolute;inset:0;border-radius:26px;background:var(--bordo);opacity:0}
+  .let{position:relative;flex:none;width:88px;height:88px;border-radius:50%;background:var(--gold);color:var(--red);
+       font-family:'Oswald',sans-serif;font-weight:700;font-size:54px;line-height:88px;text-align:center}
+  .bar{position:relative;flex:none;width:5px;height:64px;border-radius:3px;background:var(--red)}
+  .opt span{position:relative;flex:1;font-weight:600;font-size:42px;line-height:1.15;color:var(--ink);text-wrap:balance}
+  .opt .ok{position:relative;flex:none;width:64px;height:64px;opacity:0}
+
+  .timer{position:absolute;left:44px;right:44px;bottom:20px;height:8px;border-radius:4px;background:rgba(198,119,32,.18);overflow:hidden}
+  .timer i{position:absolute;inset:0;background:var(--gold);border-radius:4px;transform-origin:left center}
+
+  .qs{margin-top:28px;font-weight:600;font-size:30px;line-height:1.25;color:var(--brown);opacity:.78;flex:none;text-wrap:balance}
+  .hit{margin-top:30px;display:flex;align-items:center;gap:28px;background:var(--bordo);border-radius:30px;
+       padding:30px 36px 30px 28px;flex:none;box-shadow:0 10px 0 -2px rgba(140,20,20,.18)}
+  .hit .let{width:104px;height:104px;line-height:104px;font-size:64px;color:var(--bordo)}
+  .hit span{flex:1;font-family:'Oswald',sans-serif;font-weight:600;font-size:66px;line-height:1.05;
+            text-transform:uppercase;color:var(--cream);letter-spacing:.01em;text-wrap:balance}
+  .hit svg{flex:none;width:72px;height:72px}
+  .comment{margin-top:34px;font-weight:500;font-size:38px;line-height:1.3;color:var(--ink);text-wrap:pretty}
+  .foot{margin-top:auto;display:flex;justify-content:flex-end}
+  .foot img{max-height:130px;max-width:300px;display:block;object-fit:contain}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="head">
+    <img class="lockup" src="assets/lockup.png" alt="">
+    <img class="rooster" id="rooster" src="assets/rooster.png" alt="">
+  </div>
+  <div class="titlebox">
+      <div class="tstack"><h1 id="tQ">Вопрос</h1><h1 id="tA">Ответ</h1></div>
+      <img class="remeslo" src="assets/remeslo.png" alt="">
+    </div>
+  <div class="panel" id="panel">
+    <div class="sect"><div class="track" id="track"></div><div class="pill" id="pill"></div></div>
+    <div class="layer" id="LQ"></div>
+    <div class="layer" id="LA"></div>
+    <div class="timer" id="timer"><i id="timerBar"></i></div>
+  </div>
+  <div class="orn" id="orn"></div>
+</div>
+<script src="quiz-data.js"></script>
+<script>
+// ---------- тайминг, сек ----------
+const T = {
+  inQ: 0.15,      // появление вопроса
+  think: [2.3, 13.0], // таймер «думаем»
+  reveal: 13.0,   // подсветка правильного варианта
+  swap: 15.4,     // переход к слайду-ответу
+  end: 23.0,      // длина ролика
+};
+const P = new URLSearchParams(location.search);
+const n = +(P.get('n') || 3);
+const Q = QUIZ.find(x => x.n === n) || QUIZ[0];
+const L = 'АБВ';
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/(\p{L})-(\p{L})/gu,'$1‑$2')                                  // неразрывный дефис: «из‑за»
+  .replace(/(^|[\s«(])([а-яёА-ЯЁ]{1,2}|II|I|XVI|XIII|XIX|XVII)\s/gu,'$1$2 '); // предлоги и короткие слова не висят;
+const $ = id => document.getElementById(id);
+const tick = (c1,c2,w=7) => `<path d="M20 37l11 11 22-24" fill="none" stroke="${c2}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" class="tick"/>`;
+
+$('pill').innerHTML = `Вопрос <span class="no">№ ${Q.n}</span>`;
+$('LQ').innerHTML = `<div class="q" id="q">${esc(Q.q)}</div>
+  <div class="opts">${Q.opts.map((o,i)=>`<div class="opt" id="o${i}"><div class="hl"></div><div class="let">${L[i]}</div><div class="bar"></div><span>${esc(o)}</span>${i===Q.ok?`<svg class="ok" viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#E2B863"/>${tick(0,'#8C1414')}</svg>`:''}</div>`).join('')}</div>`;
+$('LA').innerHTML = `<div class="qs" id="qs">${esc(Q.q)}</div>
+  <div class="hit" id="hit"><div class="let" id="hitLet">${L[Q.ok]}</div><span id="hitT">${esc(Q.opts[Q.ok])}</span><svg viewBox="0 0 72 72" id="hitOk"><circle cx="36" cy="36" r="34" fill="#E2B863"/>${tick(0,'#8C1414')}</svg></div>
+  <div class="comment" id="cm">${esc(Q.comment)}</div>
+  <div class="foot" id="foot">${Q.logo?`<img src="assets/logos/${Q.logo}.png" alt="">`:''}</div>`;
+
+function fitTitle(){
+  const r = document.querySelector('.head .rooster').getBoundingClientRect().right + 50;
+  document.querySelectorAll('.titlebox h1').forEach(h=>{ let fs=84; h.style.fontSize='';
+    while (h.getBoundingClientRect().left < r && fs>48){ fs-=2; h.style.fontSize=fs+'px'; } }); }
+// ---------- автоподгон (как в quiz.html) ----------
+function fit(layer, el, min){ if(!el) return; let fs=parseFloat(getComputedStyle(el).fontSize);
+  while (layer.scrollHeight > layer.clientHeight+1 && fs>min){ fs-=2; el.style.fontSize=fs+'px'; } }
+
+// ---------- анимации ----------
+const E = { out:'cubic-bezier(.2,.8,.2,1)', back:'cubic-bezier(.34,1.56,.64,1)', io:'cubic-bezier(.65,0,.35,1)' };
+function A(el, frames, at, dur, ease=E.out, extra={}){
+  if (typeof el==='string') el=$(el); if(!el) return;
+  return el.animate(frames, {delay:at*1000, duration:dur*1000, easing:ease, fill:'both', ...extra});
+}
+function build(){
+  const tq=T.inQ, sw=T.swap, rv=T.reveal;
+  // постоянное: орнамент едет, петух кивает
+  const tile = 62*5757/369;
+  A('orn', [{backgroundPosition:'0 0'},{backgroundPosition:`-${tile}px 0`}], 0, 24, 'linear', {iterations:Infinity, fill:'none'});
+  A('rooster', [{transform:'rotate(0)'},{transform:'rotate(-4deg)'},{transform:'rotate(1.5deg)'},{transform:'rotate(0)'},{transform:'rotate(0)'}],
+    0.8, 4.0, 'ease-in-out', {iterations:Infinity, fill:'none'});
+
+  // шапка: смена «Вопрос» → «Ответ»
+  A('tQ', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .32, 'cubic-bezier(.5,0,.75,0)');
+  A('tA', [{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}], sw+.34, .5, E.out);
+
+  // плашка раздела
+  A('track', [{transform:'scaleX(0)'},{transform:'scaleX(1)'}], tq+.1, .8, E.out);
+  A('pill', [{opacity:0,transform:'translateX(-40px)'},{opacity:1,transform:'none'}], tq, .55, E.back);
+
+  // вопрос и варианты
+  A('q', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], tq+.35, .7);
+  [0,1,2].forEach(i=>{
+    const o=$('o'+i), at=tq+1.0+i*.22;
+    A(o, [{opacity:0,transform:'translateX(70px)'},{opacity:1,transform:'none'}], at, .6);
+    A(o.querySelector('.let'), [{transform:'scale(0)'},{transform:'scale(1)'}], at+.15, .5, E.back);
+    if (i===Q.ok){
+      A(o.querySelector('.hl'), [{opacity:0},{opacity:1}], rv+.25, .45, E.io);
+      A(o.querySelector('span'), [{color:'#5B1C12'},{color:'#F9F0E4'}], rv+.25, .45, E.io);
+      A(o.querySelector('.let'), [{color:'#BE1717'},{color:'#8C1414'}], rv+.25, .45, E.io);
+      A(o.querySelector('.bar'), [{background:'#BE1717'},{background:'#E2B863'}], rv+.25, .45, E.io);
+      A(o, [{transform:'scale(1)'},{transform:'scale(1.035)'},{transform:'scale(1)'}], rv+.25, .7, E.io);
+      A(o.querySelector('.ok'), [{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'scale(1)'}], rv+.6, .45, E.back);
+      A(o.querySelector('.tick'), [{strokeDashoffset:1},{strokeDashoffset:0}], rv+.8, .4, E.out);
+    } else {
+      A(o, [{opacity:1,filter:'saturate(1)'},{opacity:.32,filter:'saturate(.3)'}], rv, .5, E.io);
+    }
+  });
+  // таймер
+  A('timer', [{opacity:0},{opacity:1}], T.think[0]-.3, .3);
+  A('timerBar', [{transform:'scaleX(1)'},{transform:'scaleX(0)'}], T.think[0], T.think[1]-T.think[0], 'linear');
+  A('timer', [{opacity:1},{opacity:0}], rv, .3);
+
+  // переход к ответу
+  A('LQ', [{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}], sw, .45, E.io);
+  A('qs', [{opacity:0,transform:'translateY(16px)'},{opacity:.78,transform:'none'}], sw+.35, .5);
+  A('hit', [{opacity:0,transform:'scale(.92)'},{opacity:1,transform:'scale(1)'}], sw+.5, .6, E.back);
+  A('hitLet', [{transform:'scale(0) rotate(-90deg)'},{transform:'none'}], sw+.75, .55, E.back);
+  A('hitOk', [{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'scale(1)'}], sw+1.0, .45, E.back);
+  A(document.querySelector('#hitOk .tick'), [{strokeDashoffset:1},{strokeDashoffset:0}], sw+1.15, .4);
+  A('cm', [{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'none'}], sw+1.3, .7);
+  A('foot', [{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}], sw+2.0, .6);
+}
+
+// перемотка на кадр (для рендера)
+window.seek = t => { document.getAnimations().forEach(a=>{ a.pause(); a.currentTime = t*1000; }); };
+window.DUR = T.end;
+
+Promise.all(['800 58px "Wix Madefor Display"','600 42px "Wix Madefor Display"','500 38px "Wix Madefor Display"',
+  '600 30px "Wix Madefor Display"','700 74px Oswald','600 66px Oswald'].map(f=>document.fonts.load(f, 'АБВ'))).then(()=>document.fonts.ready).then(()=>{
+  fitTitle();
+  fit($('LQ'), $('q'), 48);
+  if ($('LQ').scrollHeight > $('LQ').clientHeight+1) document.querySelectorAll('.opt').forEach(o=>{o.style.minHeight="96px"; o.querySelector('span').style.fontSize='38px';});
+  fit($('LA'), $('cm'), 32); fit($('LA'), $('hitT'), 48);
+  const a=$('hitT'); let fs=parseFloat(getComputedStyle(a).fontSize); while (a.offsetHeight > fs*1.05*2+4 && fs>44){ fs-=2; a.style.fontSize=fs+'px'; }
+  build();
+  if (P.has('rec')) seek(0);
+  else if (P.has('loop')) setInterval(()=>{ document.getAnimations().forEach(x=>{x.currentTime=0; x.play();}); }, T.end*1000);
+  document.body.dataset.ready='1';
+});
+</script>
+</body>
+</html>

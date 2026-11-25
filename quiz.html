@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Экраны МП · Викторина</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Wix+Madefor+Display:wght@500;600;700;800&display=block" rel="stylesheet">
+<style>
+  /* Квадратный экран 1080×1080. ?n=3 — номер вопроса, &a — слайд-ответ.
+     Палитра и шапка — как у баннера «Благодарим партнёров» (брендбук МП 2026),
+     панель и плашки — по мотивам «Расписания мастер-классов». */
+  :root{
+    --red:#BE1717; --bordo:#8C1414; --gold:#E2B863; --orange:#EFA43A; --copper:#C67720;
+    --cream:#F9F0E4; --peach:#F6DFBD; --peach2:#FBEAD2; --ink:#5B1C12; --brown:#723715;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#222}
+  .stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--red);
+         font-family:'Wix Madefor Display',sans-serif;color:var(--ink)}
+
+  /* шапка: слева логотип + петух, справа название блока (без дат) */
+  .head{position:absolute;left:44px;top:30px;height:150px;display:flex;align-items:center;gap:26px}
+  .head img{display:block}
+  .head .lockup{height:138px}
+  .head .rooster{height:150px;transform-origin:62% 92%}
+  .titlebox{position:absolute;right:48px;top:30px;height:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:12px}
+  .tstack{display:grid}
+  .titlebox h1{grid-area:1/1;justify-self:end;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:var(--cream);
+               font-size:84px;line-height:.92;white-space:nowrap;letter-spacing:.01em;text-align:right}
+  .titlebox .remeslo{height:40px;display:block}
+
+  /* ---------- поле ---------- */
+  .panel{position:absolute;left:28px;top:206px;width:1024px;height:796px;background:var(--cream);
+         border-radius:32px;padding:40px 44px 44px;display:flex;flex-direction:column}
+  .orn{position:absolute;left:0;right:0;bottom:0;height:62px;
+       background:url(assets/ornament_straight.png) repeat-x 0 0/auto 62px}
+
+  /* плашка раздела как в расписании: красная таблетка на персиковой полосе */
+  .sect{position:relative;display:flex;align-items:center;height:58px;flex:none}
+  .sect::after{content:"";position:absolute;left:40px;right:-44px;top:9px;bottom:9px;background:var(--peach);border-radius:999px 0 0 999px;z-index:0}
+  .pill{position:relative;z-index:1;background:var(--red);color:var(--cream);font-family:'Oswald',sans-serif;
+        font-weight:600;font-size:34px;line-height:58px;height:58px;padding:0 30px;border-radius:999px;
+        text-transform:uppercase;letter-spacing:.03em}
+  .pill .no{color:var(--gold)}
+
+  .q{margin-top:30px;font-weight:800;font-size:58px;line-height:1.13;letter-spacing:-.005em;color:var(--ink);flex:none;text-wrap:balance}
+
+  .opts{flex:1 0 auto;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;margin-top:34px}
+  .opt{display:flex;align-items:center;gap:26px;background:var(--peach2);border-radius:26px;padding:14px 30px 14px 16px;min-height:112px}
+  .let{flex:none;width:88px;height:88px;border-radius:50%;background:var(--gold);color:var(--red);
+       font-family:'Oswald',sans-serif;font-weight:700;font-size:54px;line-height:88px;text-align:center}
+  .bar{flex:none;width:5px;height:64px;border-radius:3px;background:var(--red)}
+  .opt span{font-weight:600;font-size:42px;line-height:1.15;color:var(--ink);text-wrap:balance}
+
+  /* ---------- ответ ---------- */
+  .qs{margin-top:28px;font-weight:600;font-size:30px;line-height:1.25;color:var(--brown);opacity:.78;flex:none;text-wrap:balance}
+  .hit{margin-top:30px;display:flex;align-items:center;gap:28px;background:var(--bordo);border-radius:30px;
+       padding:30px 36px 30px 28px;flex:none;box-shadow:0 10px 0 -2px rgba(140,20,20,.18)}
+  .hit .let{width:104px;height:104px;line-height:104px;font-size:64px;background:var(--gold);color:var(--bordo)}
+  .hit span{flex:1;font-family:'Oswald',sans-serif;font-weight:600;font-size:66px;line-height:1.05;
+            text-transform:uppercase;color:var(--cream);letter-spacing:.01em;text-wrap:balance}
+  .hit svg{flex:none;width:72px;height:72px}
+  .comment{margin-top:34px;font-weight:500;font-size:38px;line-height:1.3;color:var(--ink);text-wrap:pretty}
+  .foot{margin-top:auto;display:flex;align-items:flex-end;justify-content:flex-end;min-height:0}
+  .foot img{max-height:130px;max-width:300px;display:block;object-fit:contain}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="head">
+    <img class="lockup" src="assets/lockup.png" alt="Мир пряника">
+    <img class="rooster" src="assets/rooster.png" alt="">
+  </div>
+  <div class="titlebox"><div class="tstack"><h1 id="title">Вопрос</h1></div><img class="remeslo" src="assets/remeslo.png" alt="Ремесло в прянике"></div>
+  <div class="panel" id="panel"></div>
+  <div class="orn"></div>
+</div>
+<script src="quiz-data.js"></script>
+<script>
+const P = new URLSearchParams(location.search);
+const n = +(P.get('n') || 3);
+const isA = P.has('a');
+const Q = QUIZ.find(x => x.n === n) || QUIZ[0];
+const L = 'АБВ';
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/(\p{L})-(\p{L})/gu,'$1‑$2')                                  // неразрывный дефис: «из‑за»
+  .replace(/(^|[\s«(])([а-яёА-ЯЁ]{1,2}|II|I|XVI|XIII|XIX|XVII)\s/gu,'$1$2 '); // предлоги и короткие слова не висят;
+const panel = document.getElementById('panel');
+document.getElementById('title').textContent = isA ? 'Ответ' : 'Вопрос';
+
+const sect = `<div class="sect"><div class="pill">Вопрос <span class="no">№ ${Q.n}</span></div></div>`;
+const check = `<svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#E2B863"/><path d="M20 37l11 11 22-24" fill="none" stroke="#8C1414" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+if (!isA){
+  panel.innerHTML = sect + `<div class="q" id="fitQ">${esc(Q.q)}</div>
+    <div class="opts">${Q.opts.map((o,i)=>`<div class="opt"><div class="let">${L[i]}</div><div class="bar"></div><span>${esc(o)}</span></div>`).join('')}</div>`;
+} else {
+  panel.innerHTML = sect + `<div class="qs">${esc(Q.q)}</div>
+    <div class="hit"><div class="let">${L[Q.ok]}</div><span id="fitA">${esc(Q.opts[Q.ok])}</span>${check}</div>
+    <div class="comment" id="fitC">${esc(Q.comment)}</div>
+    <div class="foot">${Q.logo?`<img src="assets/logos/${Q.logo}.png" alt="">`:''}</div>`;
+}
+
+function fitTitle(){
+  const r = document.querySelector('.head .rooster').getBoundingClientRect().right + 50;
+  document.querySelectorAll('.titlebox h1').forEach(h=>{ let fs=84; h.style.fontSize='';
+    while (h.getBoundingClientRect().left < r && fs>48){ fs-=2; h.style.fontSize=fs+'px'; } }); }
+// Автоподгон: уменьшаем кегль, пока всё не влезет в поле (нижние пороги — из ТЗ: вопрос ≥48, остальное ≥36)
+function fits(){ return panel.scrollHeight <= panel.clientHeight + 1; }
+function shrink(el, min, step=2){
+  if (!el) return; let fs = parseFloat(getComputedStyle(el).fontSize);
+  while (!fits() && fs > min){ fs -= step; el.style.fontSize = fs+'px'; }
+}
+Promise.all(['800 58px "Wix Madefor Display"','600 42px "Wix Madefor Display"','500 38px "Wix Madefor Display"',
+  '600 30px "Wix Madefor Display"','700 74px Oswald','600 66px Oswald'].map(f=>document.fonts.load(f, 'АБВ'))).then(()=>document.fonts.ready).then(()=>{
+  fitTitle();
+  if (!isA){
+    shrink(document.getElementById('fitQ'), 48);
+    if (!fits()) document.querySelectorAll('.opt').forEach(o=>{o.style.minHeight="96px"; o.querySelector('span').style.fontSize='38px';});
+  } else {
+    shrink(document.getElementById('fitC'), 32);
+    shrink(document.getElementById('fitA'), 48);
+  }
+  // длинный ответ в бордовой плашке — сжимаем, чтобы влез в 2 строки
+  const a = document.getElementById('fitA');
+  if (a){ let fs=66; while (a.offsetHeight > fs*1.05*2+4 && fs>44){ fs-=2; a.style.fontSize=fs+'px'; } }
+  document.body.dataset.ready = '1';
+});
+</script>
+</body>
+</html>
