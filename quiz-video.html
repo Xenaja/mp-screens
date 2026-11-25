@@ -73,10 +73,10 @@ MPH.mount([{id:'tQ',text:'Вопрос'},{id:'tA',text:'Ответ'}]);
 // ---------- тайминг, сек ----------
 const T = {
   inQ: 0.15,      // появление вопроса
-  think: [3.0, 13.0], // таймер «думаем»
-  reveal: 13.0,   // подсветка правильного варианта
-  swap: 15.4,     // переход к слайду-ответу
-  end: 23.0,      // длина ролика
+  think: [4.1, 10.1], // таймер «думаем» (6 с после того, как всё появилось)
+  reveal: 10.1,   // подсветка правильного варианта
+  swap: 12.5,     // переход к слайду-ответу
+  end: 20.1,      // длина ролика
 };
 const P = new URLSearchParams(location.search);
 const n = +(P.get('n') || 3);
@@ -104,10 +104,10 @@ function fit(layer, el, min){ if(!el) return; let fs=parseFloat(getComputedStyle
 // ---------- анимации ----------
 // плавность: easeOutQuint для выездов, лёгкий отскок вместо «пружины»; появления медленнее в SLOW раз
 const E = { out:'cubic-bezier(.22,1,.36,1)', back:'cubic-bezier(.28,1.18,.52,1)', io:'cubic-bezier(.65,0,.35,1)' };
-const SLOW = 1.6;
+const SLOW = 1.6, SLOW_IN = 2.2;   // SLOW_IN — стартовое появление
 function A(el, frames, at, dur, ease=E.out, extra={}){
   if (typeof el==='string') el=$(el); if(!el) return;
-  const k = (extra.iterations || ease==='linear' || extra.fixed) ? 1 : SLOW; delete extra.fixed;
+  const k = (extra.iterations || ease==='linear' || extra.fixed) ? 1 : (at < T.think[0] ? SLOW_IN : SLOW); delete extra.fixed;
   return el.animate(frames, {delay:at*1000, duration:dur*k*1000, easing:ease, fill:'both', ...extra});
 }
 function build(){
@@ -127,9 +127,9 @@ function build(){
   A('pill', [{opacity:0,transform:'translateX(-40px)'},{opacity:1,transform:'none'}], tq, .55, E.back);
 
   // вопрос и варианты
-  A('q', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], tq+.35, .7);
+  A('q', [{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'none'}], tq+.5, .7);
   [0,1,2].forEach(i=>{
-    const o=$('o'+i), at=tq+1.15+i*.3;
+    const o=$('o'+i), at=tq+1.55+i*.45;
     A(o, [{opacity:0,transform:'translateX(40px)'},{opacity:1,transform:'none'}], at, .6);
     A(o.querySelector('.let'), [{transform:'scale(0)'},{transform:'scale(1)'}], at+.15, .5, E.back);
     if (i===Q.ok){
